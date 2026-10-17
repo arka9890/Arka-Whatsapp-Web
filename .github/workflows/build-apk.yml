@@ -27,6 +27,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      - name: Test badge hook (Node)
+        working-directory: whatsapp-web-client
+        run: node tools/badge_hook.test.js
+
       - name: Build Release APK
         working-directory: whatsapp-web-client
         env:
