@@ -8,6 +8,7 @@ Aplikasi Android Kotlin yang membungkus WhatsApp Web resmi dalam WebView. Fitur 
 - **Pembatasan percobaan PIN:** setelah 5 percobaan salah, input PIN dikunci selama 5 menit. Status lockout disimpan terenkripsi.
 - **Auto-lock:** aplikasi meminta autentikasi lagi setelah 30 detik berada di latar belakang (ditinggalkan), bukan saat sedang dipakai. WebView tidak dibuat/dibuka sebelum autentikasi berhasil.
 - **Badge unread:** jumlah chat belum terbaca dibaca dari judul dokumen WhatsApp Web (`(3) WhatsApp`) oleh `app/src/main/assets/badge_hook.js` yang dipasang lewat `evaluateJavascript` saat halaman mulai/selesai dimuat, lalu diteruskan ke `UnreadBadgeManager` (ShortcutBadger + notifikasi `setNumber`).
+- **UA desktop:** WebView mengirim UA Chrome desktop (`WhatsAppApp.DESKTOP_USER_AGENT`) karena WhatsApp Web menolak UA ponsel — tanpa ini yang muncul halaman "buka aplikasi WhatsApp", bukan QR/kode tautan.
 - **Penyimpanan metadata terenkripsi:** hash PIN bersalt (PBKDF2-HMAC-SHA-256) serta daftar/nama akun disimpan melalui `EncryptedSharedPreferences`; master key dikelola Android Keystore.
 - **Multi-akun:** tiap akun memakai profil WebView tersendiri melalui AndroidX WebKit `MULTI_PROFILE`, termasuk cookie dan data browsing yang dipisahkan. Pengguna dapat menambah, memilih, dan menghapus akun.
 - **Fail-closed untuk isolasi:** akun tambahan tidak dibuat atau dibuka bila Android System WebView pada perangkat tidak mendukung profil terpisah. Perbarui System WebView untuk mengaktifkan fitur tersebut; aplikasi tidak diam-diam membagikan cookie.

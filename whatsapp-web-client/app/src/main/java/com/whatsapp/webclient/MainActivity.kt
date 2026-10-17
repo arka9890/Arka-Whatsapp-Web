@@ -214,6 +214,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun configureWebView(webView: WebView) {
         webView.settings.apply {
+            // WhatsApp Web menolak UA ponsel (halaman "buka aplikasi", tanpa QR/kode tautan).
+            userAgentString = WhatsAppApp.DESKTOP_USER_AGENT
             javaScriptEnabled = true
             domStorageEnabled = true
             databaseEnabled = false

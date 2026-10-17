@@ -21,6 +21,15 @@ class WhatsAppApp : Application() {
 
         const val WHATSAPP_WEB_URL = "https://web.whatsapp.com"
 
+        /**
+         * WhatsApp Web menolak UA ponsel: yang muncul halaman "buka aplikasi WhatsApp", bukan
+         * QR/kode tautan. Jadi WebView memakai UA Chrome desktop. Nilai ini dipakai untuk header
+         * HTTP sekaligus `navigator.userAgent`, jadi deteksi di sisi skrip pun lolos.
+         */
+        const val DESKTOP_USER_AGENT =
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+                "(KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+
         @Volatile
         private var instance: WhatsAppApp? = null
 
