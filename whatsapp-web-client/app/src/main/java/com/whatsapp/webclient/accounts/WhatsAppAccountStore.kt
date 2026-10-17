@@ -50,6 +50,9 @@ class WhatsAppAccountStore {
         require(label.isNotEmpty()) { "Account name cannot be empty" }
 
         val accounts = getAccounts()
+        if (accounts.size >= MAX_ACCOUNTS) {
+            throw AccountLimitReachedException(MAX_ACCOUNTS)
+        }
         if (accounts.isNotEmpty() && !supportsMultiProfile) {
             throw MultiProfileUnsupportedException()
         }
@@ -109,8 +112,15 @@ class WhatsAppAccountStore {
 
     companion object {
         const val MAX_LABEL_LENGTH = 32
+
+        /** Tiap akun adalah sesi WhatsApp penuh di profil WebView sendiri, jadi dibatasi. */
+        const val MAX_ACCOUNTS = 4
     }
 }
+
+class AccountLimitReachedException(val limit: Int) : IllegalStateException(
+    "At most $limit accounts are supported"
+)
 
 class MultiProfileUnsupportedException : IllegalStateException(
     "This Android System WebView does not support isolated profiles"

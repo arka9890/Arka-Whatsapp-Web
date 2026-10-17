@@ -24,6 +24,7 @@ import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import com.whatsapp.webclient.accounts.AccountLimitReachedException
 import com.whatsapp.webclient.accounts.MultiProfileUnsupportedException
 import com.whatsapp.webclient.accounts.WhatsAppAccount
 import com.whatsapp.webclient.accounts.WhatsAppAccountStore
@@ -328,6 +329,15 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        if (accounts.size >= WhatsAppAccountStore.MAX_ACCOUNTS) {
+            Toast.makeText(
+                this,
+                getString(R.string.account_limit_reached, WhatsAppAccountStore.MAX_ACCOUNTS),
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+
         val nameInput = layoutInflater.inflate(R.layout.dialog_add_account, null)
         val input = nameInput.findViewById<TextInputEditText>(R.id.etAccountName)
         input.setText(getString(R.string.account_default_name, accounts.size + 1))
@@ -347,6 +357,12 @@ class MainActivity : AppCompatActivity() {
                     .onFailure { error ->
                         if (error is MultiProfileUnsupportedException) {
                             Toast.makeText(this, R.string.profile_isolation_required, Toast.LENGTH_LONG).show()
+                        } else if (error is AccountLimitReachedException) {
+                            Toast.makeText(
+                                this,
+                                getString(R.string.account_limit_reached, error.limit),
+                                Toast.LENGTH_LONG
+                            ).show()
                         } else {
                             Toast.makeText(this, R.string.account_storage_error, Toast.LENGTH_LONG).show()
                         }

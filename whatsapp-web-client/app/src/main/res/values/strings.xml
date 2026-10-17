@@ -23,6 +23,7 @@
     <string name="select_account">Pilih akun</string>
     <string name="add_account">Tambah akun</string>
     <string name="add_account_description">Setiap akun memakai profil WebView terpisah.</string>
+    <string name="account_limit_reached">Maksimal %1$d akun. Hapus satu akun untuk menambah yang baru.</string>
     <string name="account_name_hint">Nama akun</string>
     <string name="account_default_name">Akun %1$d</string>
     <string name="account_name_required">Nama akun wajib diisi.</string>
