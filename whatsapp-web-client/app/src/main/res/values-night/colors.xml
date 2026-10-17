@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Claymorphism palette (dark). Same token names as values/colors.xml so the clay
+         drawables and styles adapt without a second set of -night styles. -->
+    <color name="clay_background">#1E2A3A</color>
+    <color name="clay_surface">#2A3A4A</color>
+    <color name="clay_highlight">#3B4F66</color>
+    <color name="clay_primary">#4A7FB0</color>
+    <color name="clay_accent">#E089A8</color>
+    <color name="clay_accent_dark">#C9708F</color>
+    <color name="clay_text_primary">#E8F0FF</color>
+    <color name="clay_text_secondary">#A0B0C0</color>
+    <color name="clay_divider">#3A4A5A</color>
+</resources>

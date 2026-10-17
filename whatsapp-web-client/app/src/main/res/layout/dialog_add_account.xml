@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Clay text field used by the add-account dialog. -->
+<com.google.android.material.textfield.TextInputLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Widget.ClayTextInputLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:hint="@string/account_name_hint">
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/etAccountName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:imeOptions="actionDone"
+        android:inputType="text|textCapSentences"
+        android:maxLines="1"
+        android:textColor="@color/clay_text_primary" />
+</com.google.android.material.textfield.TextInputLayout>

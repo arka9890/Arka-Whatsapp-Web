@@ -1,0 +1,32 @@
+# Android / Gradle
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+out/
+build/
+.gradle/
+local.properties
+*.jks
+*.keystore
+keystore.properties
+# Keystore rilis yang di-commit sengaja dipakai CI agar tiap build bisa saling update.
+!whatsapp-web-client/keystore.jks
+
+# Android SDK yang diunduh CI — jangan commit
+whatsapp-web-client/android-sdk/
+whatsapp-web-client/app-release-aligned.apk
+whatsapp-web-client/app/*.apk
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# CI logs / artifacts lokal
+attachments/
+*.log

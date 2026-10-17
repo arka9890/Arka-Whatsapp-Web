@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">WhatsApp Web Client</string>
+
+    <!-- App lock -->
+    <string name="pin_incorrect">PIN salah</string>
+    <string name="pin_create_title">Buat PIN aplikasi 6 digit</string>
+    <string name="pin_confirm_title">Ulangi PIN untuk konfirmasi</string>
+    <string name="pin_unlock_title">Masukkan PIN aplikasi</string>
+    <string name="pin_length_error">PIN harus terdiri dari 6 angka.</string>
+    <string name="pin_mismatch">PIN tidak cocok. Silakan buat ulang.</string>
+    <string name="pin_save_error">PIN tidak dapat disimpan. Coba lagi.</string>
+    <string name="pin_incorrect_attempts">PIN salah. Sisa percobaan: %1$d</string>
+    <string name="pin_lockout">Terlalu banyak percobaan. Coba lagi dalam %1$d detik.</string>
+    <string name="unlock">Buka</string>
+    <string name="biometric_use">Gunakan biometrik</string>
+    <string name="biometric_prompt">Buka WhatsApp Web Client</string>
+    <string name="biometric_title">Verifikasi Identitas</string>
+    <string name="biometric_subtitle">Gunakan biometrik atau PIN untuk mengakses</string>
+    <string name="biometric_use_pin">Gunakan PIN</string>
+
+    <!-- Account profiles -->
+    <string name="select_account">Pilih akun</string>
+    <string name="add_account">Tambah akun</string>
+    <string name="add_account_description">Setiap akun memakai profil WebView terpisah.</string>
+    <string name="account_name_hint">Nama akun</string>
+    <string name="account_default_name">Akun %1$d</string>
+    <string name="account_name_required">Nama akun wajib diisi.</string>
+    <string name="delete_account">Hapus akun</string>
+    <string name="delete_account_confirmation">Hapus %1$s dari aplikasi dan hapus data profil lokalnya?</string>
+    <string name="account_removed">Akun dihapus.</string>
+    <string name="account_removed_wipe_warning">Akun dihapus, tetapi pembersihan sebagian data WebView tidak dapat dikonfirmasi.</string>
+    <string name="account_storage_error">Data akun terenkripsi tidak dapat dibaca atau disimpan.</string>
+    <string name="profile_isolation_required">Versi Android System WebView ini tidak mendukung profil akun terpisah. Perbarui WebView untuk menambah atau membuka akun ini.</string>
+    <string name="profile_open_error">Profil akun tidak dapat dibuka dengan aman.</string>
+    <string name="rename_account">Ganti nama akun</string>
+
+    <!-- Existing settings and update strings -->
+    <string name="notification_channel_name">WhatsApp Web Client</string>
+    <string name="notification_channel_desc">Notifikasi update aplikasi</string>
+    <string name="update_available">Versi baru tersedia</string>
+    <string name="update_download">Mengunduh pembaruan…</string>
+    <string name="update_ready">Pembaruan siap diinstal</string>
+    <string name="update_install">Instal</string>
+    <string name="update_later">Nanti</string>
+    <string name="root_warning">Peringatan: Perangkat terdeteksi rooted. Keamanan aplikasi dapat terganggu.</string>
+    <string name="proxy_set">Proxy diatur</string>
+    <string name="proxy_disabled">Proxy dinonaktifkan</string>
+    <string name="account_switched">Akun diganti</string>
+    <string name="locked">Aplikasi terkunci</string>
+    <string name="auto_lock">Auto-lock</string>
+    <string name="security">Keamanan</string>
+    <string name="appearance">Tampilan</string>
+    <string name="theme">Tema</string>
+    <string name="theme_system">Sistem</string>
+    <string name="theme_light">Terang</string>
+    <string name="theme_dark">Gelap</string>
+    <string name="accessibility">Aksesibilitas</string>
+    <string name="talkback">TalkBack</string>
+    <string name="large_text">Teks besar</string>
+
+    <!-- Badge jumlah chat belum terbaca -->
+    <string name="badge_channel_name">Pesan belum terbaca</string>
+    <string name="badge_channel_desc">Menampilkan jumlah chat belum terbaca di ikon aplikasi</string>
+    <string name="badge_open_hint">Ketuk untuk membuka WhatsApp</string>
+    <string name="keep_alive_channel_name">Sinkronisasi latar belakang</string>
+    <string name="keep_alive_channel_desc">Menjaga notifikasi dan badge tetap aktif</string>
+    <plurals name="unread_messages">
+        <item quantity="one">%d chat belum dibaca</item>
+        <item quantity="other">%d chat belum dibaca</item>
+    </plurals>
+</resources>

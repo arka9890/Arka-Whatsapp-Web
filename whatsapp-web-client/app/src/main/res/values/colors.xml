@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Claymorphism palette (light). Dark mode redefines the same names in values-night. -->
+    <color name="clay_background">#D6E8FF</color>
+    <color name="clay_surface">#F0F7FF</color>
+    <color name="clay_highlight">#FFFFFF</color>
+    <color name="clay_primary">#5B9BD5</color>
+    <color name="clay_accent">#F4A8C8</color>
+    <color name="clay_accent_dark">#E089A8</color>
+    <color name="clay_text_primary">#2A3A4A</color>
+    <color name="clay_text_secondary">#5A6A7A</color>
+    <color name="clay_divider">#C4D4E8</color>
+</resources>

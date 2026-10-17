@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.WhatsAppWebClient" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@color/clay_primary</item>
+        <item name="android:navigationBarColor">@color/clay_background</item>
+        <item name="android:windowBackground">@color/clay_background</item>
+        <item name="colorPrimary">@color/clay_primary</item>
+        <item name="colorSecondary">@color/clay_accent</item>
+        <item name="colorSurface">@color/clay_surface</item>
+        <item name="colorOnSurface">@color/clay_text_primary</item>
+        <item name="android:textColorPrimary">@color/clay_text_primary</item>
+        <item name="android:textColorSecondary">@color/clay_text_secondary</item>
+        <!-- Material3 sets these two attrs independently, for AppCompat and Material builders. -->
+        <item name="alertDialogTheme">@style/ThemeOverlay.Clay.Dialog</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Clay.Dialog</item>
+    </style>
+
+    <!-- Clay sheet for alert dialogs: puffy surface, 28dp corners, readable labels. -->
+    <style name="ThemeOverlay.Clay.Dialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="android:dialogCornerRadius">28dp</item>
+        <item name="colorSurface">@color/clay_surface</item>
+        <item name="colorSurfaceContainerHigh">@color/clay_surface</item>
+        <item name="colorOnSurface">@color/clay_text_primary</item>
+        <item name="colorOnSurfaceVariant">@color/clay_text_secondary</item>
+        <!-- Action labels sit on clay; the primary text token keeps them readable. -->
+        <item name="colorPrimary">@color/clay_text_primary</item>
+    </style>
+
+    <!-- Clay field: the Material box itself is the surface, so no background is stacked on top. -->
+    <style name="Widget.ClayTextInputLayout" parent="Widget.Material3.TextInputLayout.FilledBox">
+        <item name="boxBackgroundColor">@color/clay_surface</item>
+        <item name="boxStrokeWidth">0dp</item>
+        <item name="boxStrokeWidthFocused">0dp</item>
+        <item name="boxCornerRadiusTopStart">28dp</item>
+        <item name="boxCornerRadiusTopEnd">28dp</item>
+        <item name="boxCornerRadiusBottomStart">28dp</item>
+        <item name="boxCornerRadiusBottomEnd">28dp</item>
+        <item name="hintTextColor">@color/clay_text_secondary</item>
+        <item name="android:textColorHint">@color/clay_text_secondary</item>
+    </style>
+
+    <!-- Claymorphism account selector pill: puffy surface + chevron affordance -->
+    <style name="Widget.ClayPillButton" parent="Widget.Material3.Button">
+        <item name="android:background">@drawable/clay_pill</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textColor">@color/clay_text_primary</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingStart">18dp</item>
+        <item name="android:paddingEnd">18dp</item>
+        <item name="iconTint">@color/clay_text_secondary</item>
+        <item name="iconGravity">textEnd</item>
+        <item name="iconPadding">6dp</item>
+    </style>
+
+    <!-- Claymorphism circular icon button (add) -->
+    <style name="Widget.ClayIconButton" parent="Widget.Material3.Button">
+        <item name="android:background">@drawable/clay_icon_button</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:insetLeft">0dp</item>
+        <item name="android:insetRight">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="iconPadding">0dp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconTint">@color/clay_text_primary</item>
+    </style>
+
+    <!-- Accent variant for the destructive delete action -->
+    <style name="Widget.ClayIconButton.Accent">
+        <item name="android:background">@drawable/clay_icon_button_accent</item>
+        <item name="iconTint">@color/clay_text_primary</item>
+    </style>
+</resources>
