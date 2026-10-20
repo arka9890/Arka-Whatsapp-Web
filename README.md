@@ -1,17 +1,21 @@
 # whatsapp-web
 
-Klien WhatsApp Web Android berbasis Kotlin dan WebView. Pada versi ini sudah tersedia kunci aplikasi PIN/biometrik, penyimpanan metadata terenkripsi, dan pengelolaan beberapa akun melalui profil WebView yang terisolasi.
+Klien WhatsApp Web Android berbasis Kotlin dan WebView. Pada versi ini sudah tersedia kunci aplikasi PIN/biometrik, penyimpanan metadata terenkripsi, dan pengelolaan beberapa akun melalui profil WebView yang terisolasi. Untuk Windows ada klien terpisah (Go + WebView2) dengan installer wizard dan update otomatis.
 
 ## Struktur repo
 
 ```text
 .
-├── .github/workflows/build-apk.yml
-├── whatsapp-web-client/                  # Proyek Android
+├── .github/workflows/               # build-apk.yml (Android) dan build-windows.yml (Windows)
+├── whatsapp-web-client/             # Proyek Android
 │   ├── app/src/main/java/.../accounts/   # penyimpanan akun dan profil WebView
 │   ├── app/src/main/java/.../security/   # derivasi PIN dan security store
 │   ├── app/src/main/res/                 # layout dan resource
 │   └── tools/badge_hook.test.js           # tes hook badge Node.js
+├── windows/                         # Klien Windows (Go + WebView2)
+│   ├── main.go                      # jendela WebView2 + cek update GitHub Releases
+│   ├── build.sh                     # exe + installer
+│   └── installer/                   # skrip NSIS: wizard, uninstaller, upgrade versi lama
 └── README.md
 ```
 
@@ -32,6 +36,27 @@ Tes hook badge:
 ```bash
 node tools/badge_hook.test.js
 ```
+
+## Klien Windows
+
+Terpisah dari aplikasi Android: satu jendela WebView2 (Chromium bawaan Windows) yang menampilkan `web.whatsapp.com`. Butuh Go 1.21+ dan [NSIS](https://nsis.sourceforge.io) (`makensis`):
+
+```bash
+cd windows
+go test ./...          # tes logika versi update
+./build.sh 1.0.0       # butuh makensis di PATH
+```
+
+Hasil di `windows/dist/`:
+
+- `WhatsAppWebClient.exe` — aplikasi, bisa dijalankan tanpa instalasi.
+- `WhatsAppWebClient-Setup-1.0.0.exe` — installer wizard (sambutan → lisensi → folder → selesai), per-user ke `%LocalAppData%\Programs\WhatsAppWebClient`, plus pintasan menu mulai/desktop dan entri Add/Remove Programs.
+
+**Installer menangani versi lama**: kalau instalasi sebelumnya terdeteksi, uninstaller-nya dijalankan otomatis (senyap) sebelum file baru ditulis, jadi tidak ada file dan entri yang menumpuk. Profil WebView2 di `%LocalAppData%\WhatsAppWebClient\profile` sengaja tidak dihapus saat uninstall, supaya login WhatsApp tetap ada.
+
+**Update otomatis**: aplikasi mengecek `releases/latest` di GitHub saat dibuka. Bila ada tag versi lebih baru, dialog menawarkan mengunduh installer dan menjalankannya (aplikasi menutup diri supaya file exe tidak terkunci). Tag `v*` yang di-push membuat CI (`build-windows.yml`) membangun installer dan menerbitkannya sebagai GitHub Release dengan asset `*.exe`. Ganti `updateRepo` di `windows/main.go` bila repo pindah.
+
+Butuh Microsoft Edge WebView2 Runtime — sudah bawaan Windows 11 dan Edge; kalau belum ada, aplikasi menampilkan tautan unduhan resmi Microsoft.
 
 ## Catatan keamanan
 

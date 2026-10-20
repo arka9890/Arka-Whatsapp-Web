@@ -30,3 +30,6 @@ Thumbs.db
 # CI logs / artifacts lokal
 attachments/
 *.log
+
+# Hasil build klien Windows (di-build oleh CI / build.sh)
+windows/dist/

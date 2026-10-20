@@ -1,0 +1,62 @@
+name: Build Windows
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache-dependency-path: windows/go.sum
+
+      - name: Versi dari tag
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+          else
+            echo "VERSION=0.0.0-dev.${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+          fi
+
+      - name: NSIS
+        shell: bash
+        working-directory: windows
+        run: command -v makensis >/dev/null || choco install nsis -y --no-progress
+
+      - name: Test
+        shell: bash
+        working-directory: windows
+        run: go test ./...
+
+      - name: Build exe + installer
+        shell: bash
+        working-directory: windows
+        run: ./build.sh "$VERSION"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: whatsapp-web-windows
+          path: windows/dist/*.exe
+
+      - name: Release untuk tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" windows/dist/*.exe \
+            --title "$GITHUB_REF_NAME" --generate-notes ||
+          gh release upload "$GITHUB_REF_NAME" windows/dist/*.exe --clobber
