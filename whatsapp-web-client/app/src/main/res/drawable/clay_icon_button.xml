@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Claymorphism round icon button: pressing pushes it into the surface. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
@@ -10,15 +11,29 @@
         </shape>
     </item>
     <item>
-        <shape android:shape="rectangle">
-            <corners android:radius="24dp" />
-            <gradient
-                android:angle="270"
-                android:startColor="@color/clay_highlight"
-                android:endColor="@color/clay_surface" />
-            <stroke
-                android:width="1.5dp"
-                android:color="@color/clay_divider" />
-        </shape>
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <corners android:radius="24dp" />
+                    <gradient
+                        android:angle="270"
+                        android:startColor="@color/clay_highlight"
+                        android:endColor="@color/clay_surface" />
+                    <stroke
+                        android:width="1.5dp"
+                        android:color="@color/clay_divider" />
+                </shape>
+            </item>
+            <item>
+                <shape android:shape="rectangle">
+                    <corners android:radius="24dp" />
+                    <gradient
+                        android:angle="270"
+                        android:startColor="@color/clay_sheen"
+                        android:centerColor="@android:color/transparent"
+                        android:endColor="@color/clay_shade" />
+                </shape>
+            </item>
+        </layer-list>
     </item>
 </selector>

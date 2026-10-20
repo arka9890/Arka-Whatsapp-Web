@@ -5,6 +5,8 @@
     <color name="clay_background">#1E2A3A</color>
     <color name="clay_surface">#2A3A4A</color>
     <color name="clay_highlight">#3B4F66</color>
+    <color name="clay_sheen">#2E9FC0E8</color>
+    <color name="clay_shade">#1A000000</color>
     <color name="clay_primary">#4A7FB0</color>
     <color name="clay_accent">#E089A8</color>
     <color name="clay_accent_dark">#C9708F</color>

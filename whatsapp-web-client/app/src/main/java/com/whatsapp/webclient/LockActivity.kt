@@ -3,7 +3,10 @@ package com.whatsapp.webclient
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.content.Context
 import android.widget.Button
@@ -23,6 +26,7 @@ class LockActivity : AppCompatActivity() {
 
     private lateinit var securityStore: SecurityStore
     private lateinit var title: TextView
+    private lateinit var subtitle: TextView
     private lateinit var pinLayout: TextInputLayout
     private lateinit var pinInput: TextInputEditText
     private lateinit var unlockButton: Button
@@ -44,6 +48,7 @@ class LockActivity : AppCompatActivity() {
         securityStore = SecurityStore()
         setupMode = intent.getBooleanExtra(EXTRA_SETUP, !securityStore.isPinSet())
         title = findViewById(R.id.tvTitle)
+        subtitle = findViewById(R.id.tvSubtitle)
         pinLayout = findViewById(R.id.tilPin)
         pinInput = findViewById(R.id.etPin)
         unlockButton = findViewById(R.id.btnUnlock)
@@ -52,6 +57,24 @@ class LockActivity : AppCompatActivity() {
 
         unlockButton.setOnClickListener { submitPin() }
         biometricButton.setOnClickListener { startBiometricPrompt() }
+
+        // 6 digit penuh langsung dikirim; entri lewat tombol "done" keyboard tetap jalan.
+        pinInput.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                submitPin()
+                true
+            } else {
+                false
+            }
+        }
+        pinInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (s?.length == SecurityStore.PIN_LENGTH && unlockButton.isEnabled) submitPin()
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
 
         canUseBiometric = !setupMode &&
             BiometricManager.from(this).canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) ==
@@ -73,6 +96,13 @@ class LockActivity : AppCompatActivity() {
             setupMode -> getString(R.string.pin_confirm_title)
             else -> getString(R.string.pin_unlock_title)
         }
+        subtitle.text = getString(
+            when {
+                setupMode && firstPin == null -> R.string.lock_subtitle_create
+                setupMode -> R.string.lock_subtitle_confirm
+                else -> R.string.lock_subtitle_unlock
+            }
+        )
         pinLayout.visibility = View.VISIBLE
         unlockButton.visibility = View.VISIBLE
         biometricButton.visibility = if (canUseBiometric && !setupMode) View.VISIBLE else View.GONE

@@ -14,6 +14,9 @@
     <string name="pin_lockout">Terlalu banyak percobaan. Coba lagi dalam %1$d detik.</string>
     <string name="unlock">Buka</string>
     <string name="biometric_use">Gunakan biometrik</string>
+    <string name="lock_subtitle_create">Pilih 6 angka yang mudah Anda ingat, sulit ditebak orang lain. PIN otomatis lanjut saat sudah 6 digit.</string>
+    <string name="lock_subtitle_confirm">Ketik ulang PIN yang sama untuk memastikan tidak salah.</string>
+    <string name="lock_subtitle_unlock">Masukkan 6 digit PIN untuk membuka aplikasi.</string>
     <string name="biometric_prompt">Buka WhatsApp Web Client</string>
     <string name="biometric_title">Verifikasi Identitas</string>
     <string name="biometric_subtitle">Gunakan biometrik atau PIN untuk mengakses</string>
