@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Logo: gelembung chat ala WhatsApp (ekor kiri bawah), hijau, huruf A putih di dalamnya. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:fillColor="#25D366"
+        android:pathData="M54,52 m-26,0 a26,26 0 1,0 52,0 a26,26 0 1,0 -52,0 Z" />
+    <path
+        android:fillColor="#25D366"
+        android:pathData="M40,73.5 L36,80.5 L55,78 Z" />
+
+    <!-- Huruf A putih, tirus 4dp, dengan lobang kaunter di bawah puncak -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M54,38 L64,64 L60,64 L56.9,56 L51.1,56 L48,64 L44,64 Z M54,48.4 L55.4,52 L52.6,52 Z" />
+</vector>

@@ -126,7 +126,7 @@ object UnreadBadgeManager {
         )
         val title = context.resources.getQuantityString(R.plurals.unread_messages, count, count)
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_notify)
             .setContentTitle(title)
             .setContentText(context.getString(R.string.badge_open_hint))
             .setNumber(count)

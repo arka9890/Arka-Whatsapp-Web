@@ -99,7 +99,7 @@ class BadgeKeepAliveService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_notify)
             .setContentTitle(getString(R.string.keep_alive_channel_name))
             .setContentText(getString(R.string.keep_alive_channel_desc))
             .setContentIntent(pending)
