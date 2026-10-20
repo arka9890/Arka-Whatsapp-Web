@@ -45,3 +45,16 @@ jobs:
         with:
           name: whatsapp-web-apk
           path: whatsapp-web-client/app/build/outputs/apk/release/*.apk
+
+      - name: Release untuk tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p outgoing
+          cp whatsapp-web-client/app/build/outputs/apk/release/*.apk \
+            "outgoing/WhatsAppWebClient-${GITHUB_REF_NAME}-android.apk"
+          gh release create "$GITHUB_REF_NAME" outgoing/*.apk \
+            --title "$GITHUB_REF_NAME" --generate-notes ||
+          gh release upload "$GITHUB_REF_NAME" outgoing/*.apk --clobber
