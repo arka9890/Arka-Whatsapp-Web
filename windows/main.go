@@ -141,11 +141,18 @@ func latestInstaller() (url, tag string, err error) {
 		return "", "", err
 	}
 	for _, a := range release.Assets {
-		if strings.HasSuffix(strings.ToLower(a.Name), ".exe") {
+		if isInstallerAsset(a.Name) {
 			return a.BrowserDownloadURL, release.TagName, nil
 		}
 	}
 	return "", "", nil
+}
+
+// isInstallerAsset memilih aset installer. .exe aplikasi juga ikut diunggah ke
+// rilis dan tidak boleh dijalankan sebagai installer.
+func isInstallerAsset(name string) bool {
+	name = strings.ToLower(name)
+	return strings.HasPrefix(name, "whatsappwebclient-setup") && strings.HasSuffix(name, ".exe")
 }
 
 // download menyimpan installer ke folder sementara Windows dan mengembalikan path-nya.
