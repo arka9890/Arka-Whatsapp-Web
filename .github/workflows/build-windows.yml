@@ -32,8 +32,11 @@ jobs:
 
       - name: NSIS
         shell: bash
-        working-directory: windows
-        run: command -v makensis >/dev/null || choco install nsis -y --no-progress
+        # PATH tiap langkah diambil dari environment runner saat mulai, jadi folder NSIS
+        # yang baru terpasang harus didaftarkan ulang untuk langkah build.
+        run: |
+          command -v makensis >/dev/null || choco install nsis -y --no-progress
+          echo 'C:\Program Files (x86)\NSIS' >> "$GITHUB_PATH"
 
       - name: Test
         shell: bash
