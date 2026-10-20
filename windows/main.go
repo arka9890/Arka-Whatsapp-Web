@@ -1,8 +1,8 @@
 //go:build windows
 
-// WhatsApp Web Client untuk Windows: satu jendela WebView2 yang menampilkan
-// web.whatsapp.com, sesi login tersimpan antar-jalankan, dan update otomatis
-// dengan mengunduh installer dari GitHub Releases.
+// WhatsApp Web Client untuk Windows: web.whatsapp.com di Chrome milik pengguna
+// (mode app window, profil terisolasi), jatuh balik ke WebView2 jika Chrome
+// tidak terpasang, dan update otomatis dari GitHub Releases untuk keduanya.
 package main
 
 import (
@@ -40,6 +40,64 @@ var (
 )
 
 func main() {
+	// Pembaruan dicek dari latar: dialog tertawar sebelum jendela ada pun, dan
+	// exe lama ditutup lewat os.Exit sebelum installer menimpanya.
+	updated := make(chan bool, 1)
+	go func() { updated <- checkUpdate() }()
+
+	// Jalur utama: Chrome milik pengguna, mode app window dengan profil sendiri.
+	if launchChrome() {
+		<-updated // tunggu keputusan update supaya proses tidak mati di tengah dialog.
+		return
+	}
+	// Chrome tidak ditemukan: jatuh balik ke WebView2 (mesin Chromium bawaan Windows).
+	startWebview()
+}
+
+// launchChrome membuka web.whatsapp.com di mode app window Chrome; true bila sukses.
+func launchChrome() bool {
+	exe := chromePath()
+	if exe == "" {
+		return false
+	}
+	profile, err := chromeProfileDir()
+	if err != nil || os.MkdirAll(profile, 0o700) != nil {
+		return false
+	}
+	return exec.Command(exe,
+		"--app="+homeURL,
+		"--user-data-dir="+profile,
+		"--no-first-run",
+		"--no-default-browser-check",
+	).Start() == nil
+}
+
+// chromePath mencari chrome.exe di lokasi pemasangan standar, lalu di PATH.
+func chromePath() string {
+	for _, env := range []string{"ProgramFiles", "ProgramFiles(x86)", "LOCALAPPDATA"} {
+		cand := filepath.Join(os.Getenv(env), "Google", "Chrome", "Application", "chrome.exe")
+		if fi, err := os.Stat(cand); err == nil && !fi.IsDir() {
+			return cand
+		}
+	}
+	if exe, err := exec.LookPath("chrome.exe"); err == nil {
+		return exe
+	}
+	return ""
+}
+
+// chromeProfileDir: profil Chrome (login WhatsApp) di luar folder instalasi,
+// terpisah dari profil Chrome harian pengguna dan dari profil WebView2.
+func chromeProfileDir() (string, error) {
+	base, err := os.UserCacheDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(base, appName, "chrome-profile"), nil
+}
+
+// startWebview: jalur fallback bila Chrome tidak terpasang.
+func startWebview() {
 	dataPath, err := profileDir()
 	if err == nil {
 		err = os.MkdirAll(dataPath, 0o700)
@@ -69,7 +127,6 @@ func main() {
 	defer w.Destroy()
 
 	w.Navigate(homeURL)
-	go checkUpdate(w)
 	w.Run()
 }
 
@@ -84,29 +141,36 @@ func profileDir() (string, error) {
 }
 
 // checkUpdate menawarkan installer bila GitHub punya versi lebih baru.
-// Gagal cek jaringan, tidak ada rilis, atau pengguna menolak: aplikasi tetap jalan.
-func checkUpdate(w webview2.WebView) {
+// Mengembalikan true bila installer sudah dijalankan dan proses harus keluar;
+// gagal jaringan, tidak ada rilis, atau penolakan pengguna: aplikasi tetap jalan.
+func checkUpdate() bool {
 	setup, tag, err := latestInstaller()
 	if err != nil || setup == "" || !isNewer(tag, version) {
-		return
+		return false
 	}
 	prompt := fmt.Sprintf(
 		"Versi baru tersedia: %s (terpasang: %s).\n\n"+
 			"Instalasi akan dijalankan dan aplikasi ditutup. Lanjutkan?", tag, version)
 	if messageBox(prompt, "Perbarui WhatsApp Web Client", mbYesNo|mbIconInformation) != idYes {
-		return
+		return false
 	}
 	file, err := download(setup, tag)
 	if err != nil {
 		messageBox("Unduhan pembaruan gagal:\n"+err.Error(), "Perbarui WhatsApp Web Client", mbIconWarning)
-		return
+		return false
 	}
+	runInstallerAndExit(file)
+	return false
+}
+
+// runInstallerAndExit meluncurkan installer lalu menutup proses ini supaya
+// file exe tidak terkunci saat installer menimpanya. Tidak kembali.
+func runInstallerAndExit(file string) {
 	if err := exec.Command(file).Start(); err != nil {
 		messageBox("Installer tidak dapat dijalankan:\n"+err.Error(), "Perbarui WhatsApp Web Client", mbIconWarning)
-		return
+		os.Exit(0)
 	}
-	// Keluar dari thread UI supaya file exe tidak terkunci saat installer menimpanya.
-	w.Dispatch(func() { os.Exit(0) })
+	os.Exit(0)
 }
 
 type ghRelease struct {

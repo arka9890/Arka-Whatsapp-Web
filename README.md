@@ -39,7 +39,7 @@ node tools/badge_hook.test.js
 
 ## Klien Windows
 
-Terpisah dari aplikasi Android: satu jendela WebView2 (Chromium bawaan Windows) yang menampilkan `web.whatsapp.com`. Butuh Go 1.21+ dan [NSIS](https://nsis.sourceforge.io) (`makensis`):
+Terpisah dari aplikasi Android: aplikasi **meluncurkan Chrome milik pengguna** dalam mode app window (jendela tanpa alamat) langsung ke `web.whatsapp.com`, dengan profil Chrome terisolasi di `%LocalAppData%\WhatsAppWebClient\chrome-profile` — terpisah dari profil Chrome harian dan tidak ikut terhapus saat uninstall. Bila Chrome tidak terpasang, aplikasi jatuh balik ke satu jendela WebView2 (mesin Chromium bawaan Windows) dengan profil di `%LocalAppData%\WhatsAppWebClient\profile`. Butuh Go 1.21+ dan [NSIS](https://nsis.sourceforge.io) (`makensis`):
 
 ```bash
 cd windows
@@ -56,7 +56,7 @@ Hasil di `windows/dist/`:
 
 **Update otomatis**: aplikasi mengecek `releases/latest` di GitHub saat dibuka. Bila ada tag versi lebih baru, dialog menawarkan mengunduh installer dan menjalankannya (aplikasi menutup diri supaya file exe tidak terkunci). Tag `v*` yang di-push membuat CI (`build-windows.yml`) membangun installer dan menerbitkannya sebagai GitHub Release dengan asset `*.exe`. Ganti `updateRepo` di `windows/main.go` bila repo pindah.
 
-Butuh Microsoft Edge WebView2 Runtime — sudah bawaan Windows 11 dan Edge; kalau belum ada, aplikasi menampilkan tautan unduhan resmi Microsoft.
+WebView2 Runtime (sudah bawaan Windows 11 dan Edge) hanya dibutuhkan untuk jalur fallback; butuh Microsoft Edge WebView2 Runtime; kalau belum ada, aplikasi menampilkan tautan unduhan resmi Microsoft.
 
 ## Catatan keamanan
 
