@@ -1,6 +1,6 @@
 # whatsapp-web
 
-Klien WhatsApp Web Android berbasis Kotlin dan WebView. Pada versi ini sudah tersedia kunci aplikasi PIN/biometrik, penyimpanan metadata terenkripsi, dan pengelolaan beberapa akun melalui profil WebView yang terisolasi. Untuk Windows ada klien terpisah (Go + WebView2) dengan installer wizard dan update otomatis.
+Klien WhatsApp Web Android berbasis Kotlin dan WebView. Pada versi ini sudah tersedia kunci aplikasi PIN/biometrik, penyimpanan metadata terenkripsi, dan pengelolaan beberapa akun melalui profil WebView yang terisolasi. Untuk Windows ada klien terpisah (Go + WebView2) dengan installer wizard, update otomatis, dan pengelolaan beberapa akun lewat profil per akun.
 
 ## Struktur repo
 
@@ -39,13 +39,15 @@ node tools/badge_hook.test.js
 
 ## Klien Windows
 
-Terpisah dari aplikasi Android: aplikasi **meluncurkan Chrome milik pengguna** dalam mode app window (jendela tanpa alamat) langsung ke `web.whatsapp.com`, dengan profil Chrome terisolasi di `%LocalAppData%\WhatsAppWebClient\chrome-profile` — terpisah dari profil Chrome harian dan tidak ikut terhapus saat uninstall. Bila Chrome tidak terpasang, aplikasi jatuh balik ke satu jendela WebView2 (mesin Chromium bawaan Windows) dengan profil di `%LocalAppData%\WhatsAppWebClient\profile`. Butuh Go 1.21+ dan [NSIS](https://nsis.sourceforge.io) (`makensis`):
+Terpisah dari aplikasi Android: aplikasi **meluncurkan Chrome milik pengguna** dalam mode app window (jendela tanpa alamat) langsung ke `web.whatsapp.com`, dengan profil Chrome terisolasi di `%LocalAppData%\WhatsAppWebClient\chrome-profile` — terpisah dari profil Chrome harian dan tidak ikut terhapus saat uninstall. Bila Chrome tidak terpasang, aplikasi jatuh balik ke jendela WebView2 (mesin Chromium bawaan Windows) dengan profil di `%LocalAppData%\WhatsAppWebClient\profile`. Butuh Go 1.21+ dan [NSIS](https://nsis.sourceforge.io) (`makensis`):
 
 ```bash
 cd windows
-go test ./...          # tes logika versi update
+go test ./...          # tes logika versi update + logika akun
 ./build.sh 1.0.0       # butuh makensis di PATH
 ```
+
+**Multi akun**: tiap akun punya profil sendiri — direktori `--user-data-dir` Chrome (atau DataPath WebView2) per akun, jadi sesi WhatsApp antarakun tidak bercampur. Daftar akun disimpan di `%LocalAppData%\WhatsAppWebClient\accounts.json`; jendela **Akun WhatsApp** (WebView2) yang muncul bersama WhatsApp menambah, mengganti nama, menghapus, dan memilih akun. Maksimal 4 akun, sama seperti app Android. Akun pertama memakai path profil lama, jadi login yang sudah ada tidak hilang; menghapus akun juga menghapus data profilnya. Membuka akun lain menutup jendela WhatsApp sebelumnya.
 
 Hasil di `windows/dist/`:
 
@@ -56,7 +58,7 @@ Hasil di `windows/dist/`:
 
 **Update otomatis**: aplikasi mengecek `releases/latest` di GitHub saat dibuka. Bila ada tag versi lebih baru, dialog menawarkan mengunduh installer dan menjalankannya (aplikasi menutup diri supaya file exe tidak terkunci). Tag `v*` yang di-push membuat CI (`build-windows.yml`) membangun installer dan menerbitkannya sebagai GitHub Release dengan asset `*.exe`. Ganti `updateRepo` di `windows/main.go` bila repo pindah.
 
-WebView2 Runtime (sudah bawaan Windows 11 dan Edge) hanya dibutuhkan untuk jalur fallback; butuh Microsoft Edge WebView2 Runtime; kalau belum ada, aplikasi menampilkan tautan unduhan resmi Microsoft.
+WebView2 Runtime (sudah bawaan Windows 11 dan Edge) dibutuhkan untuk jalur fallback **dan** jendela management akun; kalau belum ada, aplikasi menampilkan tautan unduhan resmi Microsoft.
 
 ## Catatan keamanan
 

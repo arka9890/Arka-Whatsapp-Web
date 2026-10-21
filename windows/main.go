@@ -1,8 +1,11 @@
 //go:build windows
 
 // WhatsApp Web Client untuk Windows: web.whatsapp.com di Chrome milik pengguna
-// (mode app window, profil terisolasi), jatuh balik ke WebView2 jika Chrome
-// tidak terpasang, dan update otomatis dari GitHub Releases untuk keduanya.
+// (mode app window, profil terisolasi per akun), jatuh balik ke WebView2 jika
+// Chrome tidak terpasang, dan update otomatis dari GitHub Releases untuk keduanya.
+//
+// Multi akun: tiap akun punya direktori profil sendiri (Chrome --user-data-dir
+// atau DataPath WebView2), jadi sesi WhatsApp antarakun tidak bercampur.
 package main
 
 import (
@@ -14,6 +17,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 	"unsafe"
@@ -22,9 +26,8 @@ import (
 )
 
 const (
-	appName    = "WhatsAppWebClient"
 	homeURL    = "https://web.whatsapp.com"
-	updateRepo = "Dien45/WhatsApp-web" // sumber installer; ganti bila repo pindah
+	updateRepo = "arka9890/Arka-Whatsapp-Web" // sumber installer; ganti bila repo pindah
 )
 
 const (
@@ -39,70 +42,151 @@ var (
 	procMessageBoxW = user32.NewProc("MessageBoxW")
 )
 
+// Sesi WhatsApp yang sedang dibuka (Chrome atau proses anak WebView2).
+var (
+	sessionMu   sync.Mutex
+	sessionProc *os.Process
+)
+
 func main() {
 	// Pembaruan dicek dari latar: dialog tertawar sebelum jendela ada pun, dan
 	// exe lama ditutup lewat os.Exit sebelum installer menimpanya.
-	updated := make(chan bool, 1)
-	go func() { updated <- checkUpdate() }()
+	go func() { checkUpdate() }()
 
-	// Jalur utama: Chrome milik pengguna, mode app window dengan profil sendiri.
-	if launchChrome() {
-		<-updated // tunggu keputusan update supaya proses tidak mati di tengah dialog.
+	// Mode sesi (--session <id>): proses anak yang menampilkan WhatsApp lewat
+	// WebView2 untuk satu akun. WebView2 hanya mengizinkan satu DataPath per
+	// proses, jadi sesi dijalankan terpisah dari jendela management akun.
+	if id := sessionAccountID(); id != "" {
+		runWebviewSession(id)
 		return
 	}
-	// Chrome tidak ditemukan: jatuh balik ke WebView2 (mesin Chromium bawaan Windows).
-	startWebview()
-}
 
-// launchChrome membuka web.whatsapp.com di mode app window Chrome; true bila sukses.
-func launchChrome() bool {
-	exe := chromePath()
-	if exe == "" {
-		return false
+	base, err := appDataDir()
+	if err != nil {
+		messageBox("Folder data aplikasi tidak dapat ditemukan:\n"+err.Error(), appName, mbIconWarning)
+		return
 	}
-	profile, err := chromeProfileDir()
-	if err != nil || os.MkdirAll(profile, 0o700) != nil {
-		return false
+	store := AccountStore{Path: accountsPath(base)}
+	f, err := store.Load()
+	if err != nil {
+		// Jangan menimpa daftar akun yang rusak tanpa jejak: simpan salinannya
+		// lebih dulu, lalu mulai dari daftar kosong.
+		bak := store.Path + ".bak"
+		_ = os.Rename(store.Path, bak)
+		messageBox("Daftar akun tidak terbaca:\n"+err.Error()+
+			"\n\nDaftar lama disimpan sebagai:\n"+bak, appName, mbIconWarning)
+		f = accountsFile{}
 	}
-	return exec.Command(exe,
-		"--app="+homeURL,
-		"--user-data-dir="+profile,
-		"--no-first-run",
-		"--no-default-browser-check",
-	).Start() == nil
-}
-
-// chromePath mencari chrome.exe di lokasi pemasangan standar, lalu di PATH.
-func chromePath() string {
-	for _, env := range []string{"ProgramFiles", "ProgramFiles(x86)", "LOCALAPPDATA"} {
-		cand := filepath.Join(os.Getenv(env), "Google", "Chrome", "Application", "chrome.exe")
-		if fi, err := os.Stat(cand); err == nil && !fi.IsDir() {
-			return cand
+	if len(f.Accounts) == 0 {
+		// Instalasi pertama: satu akun memakai profil bawaan (path versi lama).
+		if f, _, err = addAccount(f, "Akun 1"); err == nil {
+			_ = store.Save(f)
 		}
 	}
-	if exe, err := exec.LookPath("chrome.exe"); err == nil {
-		return exe
+
+	// Akun aktif dibuka langsung, seperti syaranya.
+	openAccount(f, f.Active)
+
+	// Jendela management akun: tambah, ganti nama, hapus, dan pilih akun.
+	runManager(store)
+}
+
+// sessionAccountID membaca flag --session <id> dari baris perintah.
+func sessionAccountID() string {
+	for i, a := range os.Args {
+		if a == "--session" && i+1 < len(os.Args) {
+			return os.Args[i+1]
+		}
 	}
 	return ""
 }
 
-// chromeProfileDir: profil Chrome (login WhatsApp) di luar folder instalasi,
-// terpisah dari profil Chrome harian pengguna dan dari profil WebView2.
-func chromeProfileDir() (string, error) {
-	base, err := os.UserCacheDir()
-	if err != nil {
-		return "", err
+// openAccount membuka WhatsApp untuk sebuah akun: Chrome app window bila Chrome
+// terpasang, jika tidak proses anak dengan WebView2 (profil per akun).
+func openAccount(f accountsFile, id string) {
+	acc := accountByID(f, id)
+	if acc == nil && len(f.Accounts) > 0 {
+		acc = &f.Accounts[0]
 	}
-	return filepath.Join(base, appName, "chrome-profile"), nil
+	if acc == nil {
+		return
+	}
+	base, err := appDataDir()
+	if err != nil {
+		messageBox("Folder data aplikasi tidak dapat ditemukan:\n"+err.Error(), appName, mbIconWarning)
+		return
+	}
+	if exe := chromePath(); exe != "" {
+		profile := chromeProfilePath(base, *acc)
+		if err := os.MkdirAll(profile, 0o700); err != nil {
+			messageBox("Folder profil tidak dapat dibuat:\n"+err.Error(), appName, mbIconWarning)
+			return
+		}
+		closeSession()
+		cmd := exec.Command(exe,
+			"--app="+homeURL,
+			"--user-data-dir="+profile,
+			"--no-first-run",
+			"--no-default-browser-check",
+		)
+		if err := cmd.Start(); err == nil {
+			keepSession(cmd)
+		}
+		return
+	}
+	// Tanpa Chrome: WebView2 untuk akun ini, dijalankan di proses terpisah.
+	self, err := os.Executable()
+	if err != nil {
+		messageBox("Aplikasi tidak dapat dijalankan ulang:\n"+err.Error(), appName, mbIconWarning)
+		return
+	}
+	closeSession()
+	cmd := exec.Command(self, "--session", acc.ID)
+	if err := cmd.Start(); err == nil {
+		keepSession(cmd)
+	}
 }
 
-// startWebview: jalur fallback bila Chrome tidak terpasang.
-func startWebview() {
-	dataPath, err := profileDir()
-	if err == nil {
-		err = os.MkdirAll(dataPath, 0o700)
+// keepSession menyimpan handle proses sesi supaya bisa ditutup saat akun diganti.
+func keepSession(cmd *exec.Cmd) {
+	sessionMu.Lock()
+	sessionProc = cmd.Process
+	sessionMu.Unlock()
+	go func() { _ = cmd.Wait() }()
+}
+
+// closeSession menutup jendela WhatsApp yang dibuka sebelumnya.
+func closeSession() {
+	sessionMu.Lock()
+	p := sessionProc
+	sessionProc = nil
+	sessionMu.Unlock()
+	if p != nil {
+		_ = p.Kill()
 	}
+}
+
+// runWebviewSession menampilkan WhatsApp lewat WebView2 untuk satu akun.
+// Dipanggil sebagai proses anak (--session <id>).
+func runWebviewSession(id string) {
+	base, err := appDataDir()
 	if err != nil {
+		messageBox("Folder data aplikasi tidak dapat ditemukan:\n"+err.Error(), appName, mbIconWarning)
+		return
+	}
+	store := AccountStore{Path: accountsPath(base)}
+	f, err := store.Load()
+	if err != nil {
+		messageBox("Daftar akun tidak terbaca:\n"+err.Error(), appName, mbIconWarning)
+		return
+	}
+	acc := accountByID(f, id)
+	if acc == nil {
+		messageBox("Akun tidak ditemukan:\n"+id, appName, mbIconWarning)
+		return
+	}
+	dataPath := webviewDataPath(base, *acc)
+	if err := os.MkdirAll(dataPath, 0o700); err != nil {
 		messageBox("Folder profil tidak dapat dibuat:\n"+err.Error(), appName, mbIconWarning)
 		return
 	}
@@ -130,14 +214,18 @@ func startWebview() {
 	w.Run()
 }
 
-// profileDir: sesi WhatsApp disimpan di luar folder instalasi supaya uninstall /
-// update tidak menghapus login.
-func profileDir() (string, error) {
-	base, err := os.UserCacheDir() // %LocalAppData% di Windows
-	if err != nil {
-		return "", err
+// chromePath mencari chrome.exe di lokasi pemasangan standar, lalu di PATH.
+func chromePath() string {
+	for _, env := range []string{"ProgramFiles", "ProgramFiles(x86)", "LOCALAPPDATA"} {
+		cand := filepath.Join(os.Getenv(env), "Google", "Chrome", "Application", "chrome.exe")
+		if fi, err := os.Stat(cand); err == nil && !fi.IsDir() {
+			return cand
+		}
 	}
-	return filepath.Join(base, appName, "profile"), nil
+	if exe, err := exec.LookPath("chrome.exe"); err == nil {
+		return exe
+	}
+	return ""
 }
 
 // checkUpdate menawarkan installer bila GitHub punya versi lebih baru.
@@ -163,7 +251,7 @@ func checkUpdate() bool {
 	return false
 }
 
-// runInstallerAndExit meluncurkan installer lalu menutup proses ini supaya
+// runInstallerAndExit menjalankan installer lalu menutup proses ini supaya
 // file exe tidak terkunci saat installer menimpanya. Tidak kembali.
 func runInstallerAndExit(file string) {
 	if err := exec.Command(file).Start(); err != nil {
